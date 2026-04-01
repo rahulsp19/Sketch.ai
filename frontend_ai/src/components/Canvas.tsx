@@ -4,6 +4,7 @@ import { Grid2D } from './Grid2D'
 import { Scene3D } from './Scene3D'
 import { CodeView } from './CodeView'
 import { Sparkles } from 'lucide-react'
+import { CityMetricsSidebar } from './CityMetricsSidebar'
 
 function LoadingSkeleton() {
   return (
@@ -68,6 +69,9 @@ export function Canvas() {
             {viewMode === '2D' && <Grid2D />}
             {viewMode === '3D' && <Scene3D />}
             {viewMode === 'CODE' && <CodeView />}
+            
+            {/* Real-time metrics overlay */}
+            <CityMetricsSidebar />
           </motion.div>
         </AnimatePresence>
       )}
