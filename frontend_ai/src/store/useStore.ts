@@ -59,6 +59,10 @@ interface AppState {
   submitPrompt: () => Promise<void>
   newSession: () => void
   fetchHistory: () => Promise<void>
+  isNightMode: boolean
+  setNightMode: (night: boolean) => void
+  isCanvasMaximized: boolean
+  setCanvasMaximized: (max: boolean) => void
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -81,6 +85,12 @@ export const useStore = create<AppState>((set, get) => ({
 
   detailOpen: false,
   setDetailOpen: (open) => set({ detailOpen: open, selectedCell: open ? get().selectedCell : null }),
+
+  isNightMode: false,
+  setNightMode: (night) => set({ isNightMode: night }),
+  
+  isCanvasMaximized: false,
+  setCanvasMaximized: (max) => set({ isCanvasMaximized: max }),
 
   isLoading: false,
   setIsLoading: (loading) => set({ isLoading: loading }),

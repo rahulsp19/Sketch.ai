@@ -1,5 +1,5 @@
 import { useStore } from '../store/useStore'
-import { Grid3X3, Box, Code, Maximize2, Copy, Download } from 'lucide-react'
+import { Grid3X3, Box, Code, Maximize2, Copy, Download, Moon, Sun, Minimize2 } from 'lucide-react'
 import type { ViewMode } from '../types'
 
 const viewOptions: { id: ViewMode; label: string; icon: React.ReactNode }[] = [
@@ -15,6 +15,10 @@ export function WorkspaceHeader() {
   const activeHistoryId = useStore((s) => s.activeHistoryId)
   const history = useStore((s) => s.history)
   const addToast = useStore((s) => s.addToast)
+  const isNightMode = useStore((s) => s.isNightMode)
+  const setNightMode = useStore((s) => s.setNightMode)
+  const isCanvasMaximized = useStore((s) => s.isCanvasMaximized)
+  const setCanvasMaximized = useStore((s) => s.setCanvasMaximized)
 
   const activeItem = history.find((h) => h.id === activeHistoryId)
   const title = activeItem
@@ -73,13 +77,19 @@ export function WorkspaceHeader() {
             </button>
             <button
               className="util-btn"
-              title="Fullscreen"
+              title={isNightMode ? 'Switch to Day Mode' : 'Switch to Night Mode'}
+              onClick={() => setNightMode(!isNightMode)}
+            >
+              {isNightMode ? <Sun size={15} strokeWidth={1.5} /> : <Moon size={15} strokeWidth={1.5} />}
+            </button>
+            <button
+              className="util-btn"
+              title={isCanvasMaximized ? 'Minimize Workspace' : 'Maximize Workspace'}
               onClick={() => {
-                if (!document.fullscreenElement) document.documentElement.requestFullscreen()
-                else document.exitFullscreen()
+                setCanvasMaximized(!isCanvasMaximized)
               }}
             >
-              <Maximize2 size={15} strokeWidth={1.5} />
+              {isCanvasMaximized ? <Minimize2 size={15} strokeWidth={1.5} /> : <Maximize2 size={15} strokeWidth={1.5} />}
             </button>
           </div>
         )}

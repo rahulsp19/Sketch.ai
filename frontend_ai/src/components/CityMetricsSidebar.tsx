@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useStore } from '../store/useStore'
 import { Activity, Users, Leaf, Navigation } from 'lucide-react'
@@ -12,6 +12,7 @@ const compactNum = (num: number) => {
 }
 
 export function CityMetricsSidebar() {
+  const [isOpen, setIsOpen] = useState(false)
   const layoutData = useStore((s) => s.layoutData)
 
   const metrics = useMemo(() => {
@@ -83,20 +84,34 @@ export function CityMetricsSidebar() {
   }
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 20 }}
-        transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-        className="absolute top-4 right-4 z-50 w-72 bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/60 rounded-xl p-5 shadow-2xl flex flex-col gap-6"
+    <div className="absolute top-4 right-4 z-50 flex flex-col items-end gap-3 pointer-events-none">
+      {/* Toggle Button */}
+      <motion.button 
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-10 h-10 rounded-full bg-zinc-900/90 backdrop-blur-md border border-zinc-700/60 shadow-xl flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors pointer-events-auto"
+        title="Toggle Data Density"
       >
-        <div className="flex items-center justify-between">
-          <h3 className="text-zinc-100 text-[11px] font-semibold tracking-widest uppercase">
-            Data Density
-          </h3>
-          <Activity size={14} className="text-zinc-500" />
-        </div>
+        <Activity size={18} className={isOpen ? "text-blue-400" : ""} />
+      </motion.button>
+
+      {/* Dropdown Panel */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="w-72 bg-zinc-950/90 backdrop-blur-xl border border-zinc-800/60 rounded-xl p-5 shadow-2xl flex flex-col gap-6 origin-top-right pointer-events-auto"
+          >
+            <div className="flex items-center gap-2 pb-4 border-b border-zinc-800/80">
+              <Activity size={14} className="text-zinc-400" />
+              <h3 className="text-zinc-200 text-xs font-semibold tracking-wider uppercase">
+                City Metrics
+              </h3>
+            </div>
 
         {/* Top-Level KPIs */}
         <div className="grid grid-cols-2 gap-4">
@@ -174,7 +189,9 @@ export function CityMetricsSidebar() {
           })}
         </div>
 
-      </motion.div>
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
