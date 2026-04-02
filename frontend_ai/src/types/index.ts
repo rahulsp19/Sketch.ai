@@ -5,6 +5,7 @@ export interface GridCell {
   y: number
   type: 'road' | 'residential' | 'commercial' | 'park' | 'industrial' | 'water' | 'empty'
   label?: string
+  elevation?: number
 }
 
 export interface HistoryItem {

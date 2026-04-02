@@ -195,10 +195,10 @@ const RoamingCar = ({ seed }: { seed: number }) => {
   )
 }
 
-const RoadTile = ({ seed }: { seed: number }) => (
+const RoadTile = ({ seed, elevation = 0 }: { seed: number, elevation?: number }) => (
   <group>
-    <mesh position={[0, 0.01, 0]} receiveShadow>
-      <planeGeometry args={[CELL_SIZE, CELL_SIZE]} />
+    <mesh position={[0, -elevation / 2 + 0.01, 0]} receiveShadow castShadow>
+      <boxGeometry args={[CELL_SIZE - 0.05, 0.02 + elevation, CELL_SIZE - 0.05]} />
       <meshStandardMaterial color={ZONE_PALETTE.road.base} roughness={0.9} />
     </mesh>
     {/* 40% chance to spawn a roaming car on a road */}
@@ -206,9 +206,9 @@ const RoadTile = ({ seed }: { seed: number }) => (
   </group>
 )
 
-const WaterTile = () => (
-  <mesh position={[0, 0.02, 0]} receiveShadow>
-    <planeGeometry args={[CELL_SIZE, CELL_SIZE]} />
+const WaterTile = ({ elevation = 0 }: { elevation?: number }) => (
+  <mesh position={[0, -elevation / 2 + 0.02, 0]} receiveShadow castShadow>
+    <boxGeometry args={[CELL_SIZE - 0.05, 0.04 + elevation, CELL_SIZE - 0.05]} />
     <meshStandardMaterial color={ZONE_PALETTE.water.base} roughness={0.1} metalness={0.8} />
   </mesh>
 )
@@ -225,13 +225,14 @@ function CityCell({ cell, offsetX, offsetZ }: { cell: GridCell, offsetX: number,
   const isSelected = selectedCell?.x === cell.x && selectedCell?.y === cell.y
   const isHovered = hoveredCell?.x === cell.x && hoveredCell?.y === cell.y
   const seed = cell.x * 100 + cell.y * 10
+  const elevation = cell.elevation || 0
 
   const groupRef = useRef<THREE.Group>(null)
 
   // Smooth hover floating
   useFrame((_, delta) => {
     if (!groupRef.current) return
-    const targetY = isHovered ? 0.2 : 0
+    const targetY = (isHovered ? 0.2 : 0) + elevation
     easing.damp(groupRef.current.position, 'y', targetY, 0.15, delta)
   })
 
@@ -254,10 +255,6 @@ function CityCell({ cell, offsetX, offsetZ }: { cell: GridCell, offsetX: number,
       case 'park':
         return (
           <>
-            <mesh position={[0, 0.02, 0]} receiveShadow rotation={[-Math.PI/2, 0, 0]}>
-              <planeGeometry args={[CELL_SIZE - 0.1, CELL_SIZE - 0.1]} />
-              <meshStandardMaterial color={ZONE_PALETTE.park.base} roughness={1} />
-            </mesh>
             <ParkTree x={-0.3} z={-0.3} scale={1} seed={seed} />
             <ParkTree x={0.2} z={-0.2} scale={1.5} seed={seed+1} />
             <ParkTree x={-0.1} z={0.4} scale={1.2} seed={seed+2} />
@@ -265,9 +262,9 @@ function CityCell({ cell, offsetX, offsetZ }: { cell: GridCell, offsetX: number,
           </>
         )
       case 'road':
-        return <RoadTile seed={seed} />
+        return <RoadTile seed={seed} elevation={elevation} />
       case 'water':
-        return <WaterTile />
+        return <WaterTile elevation={elevation} />
       default:
         return null
     }
@@ -309,12 +306,17 @@ function CityCell({ cell, offsetX, offsetZ }: { cell: GridCell, offsetX: number,
       <group ref={groupRef}>
         {renderGeometry()}
 
-        {cell.type !== 'road' && cell.type !== 'water' && cell.type !== 'park' && (
-          <mesh position={[0, 0.05, 0]} receiveShadow castShadow>
-            <boxGeometry args={[CELL_SIZE - 0.1, 0.1, CELL_SIZE - 0.1]} />
+        {cell.type !== 'road' && cell.type !== 'water' && cell.type !== 'park' ? (
+          <mesh position={[0, -elevation / 2 + 0.05, 0]} receiveShadow castShadow>
+            <boxGeometry args={[CELL_SIZE - 0.05, 0.1 + elevation, CELL_SIZE - 0.05]} />
             <meshStandardMaterial color={getBaseColor()} roughness={0.9} />
           </mesh>
-        )}
+        ) : cell.type === 'park' ? (
+          <mesh position={[0, -elevation / 2 + 0.02, 0]} receiveShadow castShadow>
+            <boxGeometry args={[CELL_SIZE - 0.05, 0.04 + elevation, CELL_SIZE - 0.05]} />
+            <meshStandardMaterial color={ZONE_PALETTE.park.base} roughness={1} />
+          </mesh>
+        ) : null}
 
         {/* 3D Tooltip when Hovered */}
         {isHovered && cell.type !== 'empty' && (
